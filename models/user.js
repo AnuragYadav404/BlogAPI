@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+const connection = require("../config/db_connection");
 const userSchema = new Schema({
   // uid for every user
   username: { type: String, required: true, minLength: 3, maxLength: 30 },
@@ -14,3 +14,7 @@ const userSchema = new Schema({
   doj: { type: Date, default: Date.now() },
   description: { type: String, maxLength: 1000 },
 });
+
+const user = connection.model("user", userSchema);
+
+module.exports = user;
