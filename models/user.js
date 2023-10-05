@@ -9,6 +9,7 @@ const userSchema = new Schema({
   salt: { type: String, required: true },
   // permission details for user
   isAuthor: { type: Boolean, default: false },
+  // every user can be an author
   // personal details for user
   name: { type: String, required: true, minLength: 2, maxLength: 100 },
   doj: { type: Date, default: Date.now() },
