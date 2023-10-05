@@ -1,41 +1,18 @@
 const express = require("express");
 const router = express.Router();
+const user_controller = require("../controllers/userController");
 
 /* GET users listing. */
-router.get("/", function (req, res, next) {
-  res.json({
-    msg: "This returns a list of users on the website",
-  });
-});
+router.get("/", user_controller.get_users);
 
-router.post("/signup", function (req, res, next) {
-  res.json({
-    msg: "This creates a new user account",
-  });
-});
+router.post("/signup", user_controller.post_signup_user);
 
-router.post("/login", function (req, res, next) {
-  res.json({
-    msg: "This logs in a user account",
-  });
-});
+router.post("/login", user_controller.post_login_user);
 
-router.get("/:userID", function (req, res, next) {
-  res.json({
-    msg: "This returns a particular user information",
-  });
-});
+router.get("/:userID", user_controller.get_user_byID);
 
-router.put("/:userID", function (req, res, next) {
-  res.json({
-    msg: "This updates a particular user information",
-  });
-});
+router.put("/:userID", user_controller.update_user_byID);
 
-router.delete("/:userID", function (req, res, next) {
-  res.json({
-    msg: "This deletes a particular user information",
-  });
-});
+router.delete("/:userID", user_controller.delete_user_byID);
 
 module.exports = router;
