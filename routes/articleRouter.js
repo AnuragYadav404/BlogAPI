@@ -6,7 +6,7 @@ const article_comment_controller = require("../controllers/articleCommentsContro
 
 // all articles handler
 // getting all the articles
-router.get("/", article_controller.get_articles);
+router.get("/", article_controller.get_articles_list);
 
 // creating a new article
 router.post("/", article_controller.create_article);

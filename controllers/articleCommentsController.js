@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const comment = require("../models/comment");
 
 exports.get_all_comments_byArticleID = asyncHandler(async function (
   req,

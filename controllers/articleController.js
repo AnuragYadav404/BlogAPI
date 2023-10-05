@@ -1,8 +1,29 @@
 const asyncHandler = require("express-async-handler");
+const article = require("../models/article");
 
-exports.get_articles = asyncHandler(async function (req, res, next) {
+exports.get_articles_list = asyncHandler(async function (req, res, next) {
+  // this only returns a list of articles
+  const articles = await article
+    .find()
+    .populate({
+      path: "author",
+      select: "username",
+    })
+    .select({
+      aid: 1,
+      createdAt: 1,
+      title: 1,
+      claps: 1,
+      isPublished: 1,
+      url: 1,
+      author: 1,
+    })
+    .exec();
   res.json({
-    msg: "This sends back all the articles",
+    articles,
+  });
+  res.json({
+    articles,
   });
 });
 

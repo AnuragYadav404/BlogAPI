@@ -16,6 +16,10 @@ const userSchema = new Schema({
   description: { type: String, maxLength: 1000 },
 });
 
+userSchema.virtual("url").get(function () {
+  return `/users/${this._id}`;
+});
+
 const user = connection.model("user", userSchema);
 
 module.exports = user;

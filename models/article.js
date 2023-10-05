@@ -13,6 +13,10 @@ const articleSchema = new Schema({
   isPublished: { type: Boolean, default: false },
 });
 
+articleSchema.virtual("url").get(function () {
+  return `/articles/${this._id}`;
+});
+
 const article = connection.model("article", articleSchema);
 
 module.exports = article;

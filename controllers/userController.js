@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const user = require("../models/user");
 
 // controller to get the list of all the users
 exports.get_users = asyncHandler(async function (req, res, next) {
