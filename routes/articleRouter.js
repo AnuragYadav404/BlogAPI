@@ -1,43 +1,24 @@
 const express = require("express");
 const router = express.Router();
+const article_controller = require("../controllers/articleController");
 
 /* GET all the articles page. */
 
 // all articles handler
 // getting all the articles
-router.get("/", function (req, res, next) {
-  res.json({
-    msg: "This sends back all the articles",
-  });
-});
+router.get("/", article_controller.get_articles);
 
 // creating a new article
-router.post("/", function (req, res, next) {
-  res.json({
-    msg: "This route handles a new post creation",
-  });
-});
+router.post("/", article_controller.create_article);
 
 // this gets a particular article
-router.get("/:articleID", function (req, res, next) {
-  res.json({
-    msg: "This sends back a particular article info.",
-  });
-});
+router.get("/:articleID", article_controller.get_article_byID);
 
 // this updates a particular article
-router.put("/:articleID", function (req, res, next) {
-  res.json({
-    msg: "This updates a particular article.",
-  });
-});
+router.put("/:articleID", article_controller.update_article_byID);
 
 // this deletes a particular article
-router.delete("/:articleID", function (req, res, next) {
-  res.json({
-    msg: "This deletes a particular article.",
-  });
-});
+router.delete("/:articleID", article_controller.delete_article_byID);
 
 // this gets all the comments for a article
 router.get("/:articleID/comments", function (req, res, next) {
