@@ -56,11 +56,20 @@ exports.create_article = asyncHandler(async function (req, res, next) {
 });
 
 exports.get_article_byID = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This sends back a particular article info.",
-  });
+  // this finds and returns an article by its aid
+  const arti = await article.find({ aid: req.context.aid }).exec();
+  if (arti) {
+    return res.json({
+      arti,
+    });
+  } else {
+    return res.json({
+      msg: "No article found with this article id",
+    });
+  }
 });
 
+//update and delete will be done
 exports.update_article_byID = asyncHandler(async function (req, res, next) {
   res.json({
     msg: "This updates a particular article.",
