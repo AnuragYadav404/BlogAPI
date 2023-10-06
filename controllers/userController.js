@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const user = require("../models/user");
 const genPassword = require("../lib/passwordUtils").genPassword;
 const mongoose = require("mongoose");
+const { body } = require("express-validator");
 // controller to get the list of all the users
 exports.get_users = asyncHandler(async function (req, res, next) {
   // this presents a list of users
@@ -12,7 +13,6 @@ exports.get_users = asyncHandler(async function (req, res, next) {
       isAuthor: 1,
       name: 1,
       doj: 1,
-      url: 1,
     })
     .exec();
   // const usersWithUrl = users.map((user) => ({
@@ -22,36 +22,55 @@ exports.get_users = asyncHandler(async function (req, res, next) {
   return res.json(users);
 });
 
-exports.post_signup_user = asyncHandler(async function (req, res, next) {
-  // this handler will handle user creation
-  // this will also check if the username is in use
-  const checkUsername = await user
-    .findOne({
-      username: req.context.body.username,
-    })
-    .exec();
-  if (checkUsername) {
-    return res.json({
-      msg: "This username is already in use",
-    });
-  } else {
-    // console.log("creating user");
-    const { salt, hash } = genPassword(req.context.body.password);
-    const newUser = new user({
-      username: req.context.body.username,
-      hash: hash,
-      salt: salt,
-      name: req.context.body.name,
-      description: req.context.body.description,
-    });
-    await newUser.save();
-    return res.json({
-      msg: "user created",
-      userID: newUser.id,
-      href: newUser.url,
-    });
-  }
-});
+exports.post_signup_user = [
+  body("username", "Username must be min 3 characters and max 30 characters")
+    .trim()
+    .escape()
+    .isLength({ min: 3, max: 30 }),
+  body(
+    "password",
+    "password must be min 5 characters long and maximum 16 characters"
+  )
+    .trim()
+    .escape()
+    .isLength({ min: 5, max: 16 }),
+  body("description", "description must be at max 1000 characters long")
+    .trim()
+    .escape()
+    .isLength({ max: 1000 }),
+  asyncHandler(async function (req, res, next) {
+    // this handler will handle user creation
+    // this will also check if the username is in use
+    const checkUsername = await user
+      .findOne({
+        username: req.body.username,
+      })
+      .exec();
+    if (checkUsername) {
+      return res.json({
+        msg: "This username is already in use",
+      });
+    } else {
+      // console.log("creating user");
+      const { salt, hash } = genPassword(req.body.password);
+      const newUser = new user({
+        username: req.body.username,
+        hash: hash,
+        salt: salt,
+        name: req.body.name,
+      });
+      if (req.body.description) {
+        newUser.description = req.body.description;
+      }
+      await newUser.save();
+      return res.json({
+        msg: "user created",
+        userID: newUser.id,
+        href: newUser.url,
+      });
+    }
+  }),
+];
 
 exports.post_login_user = asyncHandler(async function (req, res, next) {
   // this implements post login, this will mostly be implemented

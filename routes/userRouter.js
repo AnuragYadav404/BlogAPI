@@ -11,15 +11,11 @@ router.post(
   (req, res, next) => {
     if (req.isAuthenticated()) {
       return res.json({
-        msg: "User is logged in!",
+        msg: "User is already logged in!. Log out ot signup",
       });
-    } else {
-      req.context = {
-        dummy: 1,
-      };
-      req.context.body = req.body;
-      next();
     }
+
+    next();
   },
   user_controller.post_signup_user
 );
