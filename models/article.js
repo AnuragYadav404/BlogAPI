@@ -16,6 +16,9 @@ const articleSchema = new Schema({
 articleSchema.virtual("url").get(function () {
   return `/articles/${this._id}`;
 });
+articleSchema.set("toJSON", {
+  virtuals: true,
+});
 
 const article = connection.model("article", articleSchema);
 

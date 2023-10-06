@@ -63,7 +63,7 @@ router.get(
     req.context = {
       uid: req.params.userID,
     };
-    console.log(req.params.userID);
+    // console.log(req.params.userID);
     next();
   },
   user_controller.get_user_byID
