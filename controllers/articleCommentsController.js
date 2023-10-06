@@ -9,7 +9,7 @@ exports.get_all_comments_byArticleID = asyncHandler(async function (
 ) {
   // article's comments field contains array which contains the commentID's
   const comments = await article
-    .findById(req.context.aid)
+    .findById(req.context.aid) // articleID is the document id of the article
     .populate("comments")
     .select("comments")
     .exec();
@@ -24,6 +24,7 @@ exports.create_new_comment_byArticleID = asyncHandler(async function (
   next
 ) {
   // this will create a new comment for a give aid
+  // articleID is the document id of the article
   const commentArticle = await article.findById(req.context.aid);
   if (commentArticle) {
     const newCmnt = new comment({

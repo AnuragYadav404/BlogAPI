@@ -13,14 +13,12 @@ router.post(
   "/",
   function (req, res, next) {
     if (req.isAuthenticated()) {
+      // if(req.user.isAuthor) check if user is author or not
       req.context = {
         user: req.user,
       };
-      req.context.body = req.body;
       next();
     } else {
-      console.log(req.user);
-
       return res.json({
         msg: "User not logged in. Cannot create a article.",
       });
@@ -34,7 +32,7 @@ router.get(
   "/:articleID",
   (req, res, next) => {
     req.context = {
-      aid: req.params.articleID,
+      aid: req.params.articleID, // articleID is the document id of the article
     };
     next();
   },
