@@ -33,6 +33,14 @@ router.get("/loginSuccess", (req, res, next) => {
 
 router.post(
   "/login",
+  (req, res, next) => {
+    if (req.user) {
+      return res.json({
+        msg: "You are already logged in!",
+      });
+    }
+    next();
+  },
   passport.authenticate("local", {
     failureRedirect: "/users/loginFail",
     successRedirect: "/users/loginSuccess",
