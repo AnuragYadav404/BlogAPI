@@ -3,6 +3,7 @@ const router = express.Router();
 const article_controller = require("../controllers/articleController");
 const article_comment_controller = require("../controllers/articleCommentsController");
 /* GET all the articles page. */
+const mongoose = require("mongoose");
 const passport = require("passport");
 // all articles handler
 // getting all the articles
@@ -31,6 +32,11 @@ router.post(
 router.get(
   "/:articleID",
   (req, res, next) => {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
     req.context = {
       aid: req.params.articleID, // articleID is the document id of the article
     };
