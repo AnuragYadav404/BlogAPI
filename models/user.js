@@ -19,6 +19,9 @@ const userSchema = new Schema({
 userSchema.virtual("url").get(function () {
   return `/users/${this._id}`;
 });
+userSchema.set("toJSON", {
+  virtuals: true,
+});
 
 const user = connection.model("user", userSchema);
 

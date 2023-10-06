@@ -5,7 +5,7 @@ const genPassword = require("../lib/passwordUtils").genPassword;
 exports.get_users = asyncHandler(async function (req, res, next) {
   // this presents a list of users
   const users = await user
-    .find()
+    .find({})
     .select({
       username: 1,
       isAuthor: 1,
@@ -14,6 +14,10 @@ exports.get_users = asyncHandler(async function (req, res, next) {
       url: 1,
     })
     .exec();
+  // const usersWithUrl = users.map((user) => ({
+  //   ...user.toObject(),
+  //   url: user.url, // Access the virtual 'url' property
+  // }));
   return res.json(users);
 });
 
