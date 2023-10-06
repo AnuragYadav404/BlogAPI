@@ -68,8 +68,18 @@ exports.create_article = [
 
 exports.get_article_byID = asyncHandler(async function (req, res, next) {
   // this finds and returns an article by its aid
-  const arti = await article.findById(req.context.aid).exec();
-  if (arti) {
+  const arti = await article
+    .findById(req.context.aid)
+    .populate({
+      path: "author",
+      select: {
+        username: 1,
+      },
+    })
+    .exec();
+  if (arti && arti.isPublished) {
+    // here i can also pass in a check
+    // if isPublished is true it is accessible
     return res.json({
       arti,
     });
