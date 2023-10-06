@@ -63,7 +63,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 /////
-
+app.use((req, res, next) => {
+  console.log(req.cookies);
+  next();
+});
 app.use("/articles", articleRouter);
 app.use("/users", usersRouter);
 

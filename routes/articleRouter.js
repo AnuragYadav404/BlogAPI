@@ -3,16 +3,43 @@ const router = express.Router();
 const article_controller = require("../controllers/articleController");
 const article_comment_controller = require("../controllers/articleCommentsController");
 /* GET all the articles page. */
-
+const passport = require("passport");
 // all articles handler
 // getting all the articles
 router.get("/", article_controller.get_articles_list);
 
 // creating a new article
-router.post("/", article_controller.create_article);
+router.post(
+  "/",
+  function (req, res, next) {
+    if (req.isAuthenticated()) {
+      req.context = {
+        user: req.user,
+      };
+      req.context.body = req.body;
+      next();
+    } else {
+      console.log(req.user);
+
+      return res.json({
+        msg: "User not logged in. Cannot create a article.",
+      });
+    }
+  },
+  article_controller.create_article
+);
 
 // this gets a particular article
-router.get("/:articleID", article_controller.get_article_byID);
+router.get(
+  "/:articleID",
+  (req, res, next) => {
+    req.context = {
+      aid: req.params.articleID,
+    };
+    next();
+  },
+  article_controller.get_article_byID
+);
 
 // this updates a particular article
 router.put("/:articleID", article_controller.update_article_byID);

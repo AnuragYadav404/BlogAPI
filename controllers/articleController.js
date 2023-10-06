@@ -7,7 +7,7 @@ exports.get_articles_list = asyncHandler(async function (req, res, next) {
     .find()
     .populate({
       path: "author",
-      select: "username",
+      select: "username url",
     })
     .select({
       aid: 1,
@@ -19,10 +19,7 @@ exports.get_articles_list = asyncHandler(async function (req, res, next) {
       author: 1,
     })
     .exec();
-  res.json({
-    articles,
-  });
-  res.json({
+  return res.json({
     articles,
   });
 });
@@ -31,7 +28,9 @@ exports.create_article = asyncHandler(async function (req, res, next) {
   // create article is a post request to create a new article
   // the article form info will be stored in req.context.body
   // the author info will be associated with req.context.user
-  const existArticle = await article.find({ aid: req.context.body.aid }).exec();
+  const existArticle = await article
+    .findOne({ aid: req.context.body.aid })
+    .exec();
   if (existArticle) {
     //this means that the article already exists
     return res.json({
@@ -57,7 +56,7 @@ exports.create_article = asyncHandler(async function (req, res, next) {
 
 exports.get_article_byID = asyncHandler(async function (req, res, next) {
   // this finds and returns an article by its aid
-  const arti = await article.find({ aid: req.context.aid }).exec();
+  const arti = await article.findById(req.context.aid).exec();
   if (arti) {
     return res.json({
       arti,

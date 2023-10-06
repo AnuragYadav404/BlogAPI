@@ -24,37 +24,23 @@ router.post(
   user_controller.post_signup_user
 );
 
+router.get("/loginFail", (req, res, next) => {
+  return res.json({
+    msg: "Login failed",
+  });
+});
+router.get("/loginSuccess", (req, res, next) => {
+  return res.json({
+    msg: "Login Success",
+  });
+});
+
 router.post(
   "/login",
-  function (req, res, next) {
-    if (req.isAuthenticated()) {
-      return res.json({
-        msg: "User is already logged in!",
-      });
-    }
-    next();
-  },
-  function (req, res, next) {
-    //   return res.json({
-    //     msg: "Suar",
-    //   });
-    passport.authenticate("local", function (err, userEle, info) {
-      if (err) {
-        return res.json({
-          msg: "Authentication error occured on server.",
-        });
-      }
-      if (!userEle) {
-        return res.json({
-          msg: "Wrong authentication details!",
-        });
-      }
-      return res.json({
-        msg: "Authentication succeeded",
-        userEle,
-      });
-    })(req, res, next);
-  }
+  passport.authenticate("local", {
+    failureRedirect: "/users/loginFail",
+    successRedirect: "/users/loginSuccess",
+  })
 );
 
 router.get(
