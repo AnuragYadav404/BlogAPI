@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const user = require("../models/user");
-
+const genPassword = require("../lib/passwordUtils").genPassword;
 // controller to get the list of all the users
 exports.get_users = asyncHandler(async function (req, res, next) {
   // this presents a list of users
@@ -21,7 +21,7 @@ exports.post_signup_user = asyncHandler(async function (req, res, next) {
   // this handler will handle user creation
   // this will also check if the username is in use
   const checkUsername = await user
-    .find({
+    .findOne({
       username: req.context.body.username,
     })
     .exec();
@@ -30,23 +30,28 @@ exports.post_signup_user = asyncHandler(async function (req, res, next) {
       msg: "This username is already in use",
     });
   } else {
+    // console.log("creating user");
+    const { salt, hash } = genPassword(req.context.body.password);
     const newUser = new user({
       username: req.context.body.username,
-      hash: "hash",
-      salt: "salt",
+      hash: hash,
+      salt: salt,
       name: req.context.body.name,
       description: req.context.body.description,
     });
     await newUser.save();
     return res.json({
       msg: "user created",
+      userID: newUser.id,
       href: newUser.url,
     });
   }
 });
 
 exports.post_login_user = asyncHandler(async function (req, res, next) {
-  // this implements post login, this will mostly be implemented using passport or auth
+  // this implements post login, this will mostly be implemented
+  //  using passport or auth
+  // this will never exec basically
 });
 
 exports.get_user_byID = asyncHandler(async function (req, res, next) {
