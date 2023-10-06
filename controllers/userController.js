@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const user = require("../models/user");
 const genPassword = require("../lib/passwordUtils").genPassword;
+const mongoose = require("mongoose");
 // controller to get the list of all the users
 exports.get_users = asyncHandler(async function (req, res, next) {
   // this presents a list of users
@@ -59,6 +60,12 @@ exports.post_login_user = asyncHandler(async function (req, res, next) {
 });
 
 exports.get_user_byID = asyncHandler(async function (req, res, next) {
+  // here i first have to check if uid is valid object id or not
+  if (!mongoose.isValidObjectId(req.context.uid)) {
+    return res.json({
+      msg: "User does not exist",
+    });
+  }
   const userEle = await user.findById(req.context.uid).exec();
   if (userEle) {
     res.json({
