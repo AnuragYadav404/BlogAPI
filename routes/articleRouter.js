@@ -71,6 +71,23 @@ router.get(
 // this creates a new comment for a particular article
 router.post(
   "/:articleID/comments",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    } else if (!req.isAuthenticated()) {
+      return res.json({
+        msg: "You must be logged in to comment on an article.",
+      });
+    } else {
+      req.context = {
+        aid: req.params.articleID,
+        cmnt_user: req.user,
+      };
+      next();
+    }
+  },
   article_comment_controller.create_new_comment_byArticleID
 );
 
