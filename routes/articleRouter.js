@@ -54,6 +54,17 @@ router.delete("/:articleID", article_controller.delete_article_byID);
 // this gets all the comments for a article
 router.get(
   "/:articleID/comments",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
+    req.context = {
+      aid: req.params.articleID,
+    };
+    next();
+  },
   article_comment_controller.get_all_comments_byArticleID
 );
 
