@@ -60,17 +60,41 @@ exports.create_new_comment_byArticleID = [
 ];
 
 exports.get_comment = asyncHandler(async function (req, res, next) {
-  const cmt = await comment
-    .findById(req.context.cmtID)
-    .populate("cmnt_user")
+  // here we are only collscanning the comment coll'n
+  // but comment can be deleted for a particul article
+  // we should make sure this comment is still relevant?
+  // and if the article does not have this comment, it should instead be deleted
+  // ****************************___________*************************
+  // check for cmt in article
+  const articleELe = await article
+    .findById(req.context.aid)
+    .select("comments")
     .exec();
-  if (cmt) {
-    return res.json({
-      cmt,
-    });
+  const articleComments = articleELe.comments;
+  if (articleComments.includes(req.context.cmtID)) {
+    const cmt = await comment
+      .findById(req.context.cmtID)
+      .populate({
+        path: "cmnt_user",
+        select: {
+          username: 1,
+          name: 1,
+        },
+      })
+      .exec();
+    if (cmt) {
+      return res.json({
+        cmt,
+      });
+    } else {
+      return res.json({
+        msg: "Comment not found",
+      });
+    }
   } else {
-    return res.json({
-      msg: "Comment not find",
+    // this comment does not belong to this article
+    res.json({
+      msg: "This comment does not exist",
     });
   }
 });
