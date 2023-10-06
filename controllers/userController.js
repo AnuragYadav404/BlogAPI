@@ -80,12 +80,20 @@ exports.post_login_user = asyncHandler(async function (req, res, next) {
 
 exports.get_user_byID = asyncHandler(async function (req, res, next) {
   // here i first have to check if uid is valid object id or not
-  if (!mongoose.isValidObjectId(req.context.uid)) {
-    return res.json({
-      msg: "User does not exist",
-    });
-  }
-  const userEle = await user.findById(req.context.uid).exec();
+  // this is already handled in router
+  // if (!mongoose.isValidObjectId(req.context.uid)) {
+  //   return res.json({
+  //     msg: "User does not exist",
+  //   });
+  // }
+  const userEle = await user
+    .findById(req.context.uid)
+    .select({
+      hash: 0,
+      salt: 0,
+      __v: 0,
+    })
+    .exec();
   if (userEle) {
     res.json({
       userEle,

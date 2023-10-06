@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const user_controller = require("../controllers/userController");
 const passport = require("passport");
-
+const mongoose = require("mongoose");
 /* GET users listing. */
 router.get("/", user_controller.get_users);
 
@@ -50,6 +50,11 @@ router.post(
 router.get(
   "/:userID",
   function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.userID)) {
+      return res.json({
+        msg: "User does not exist",
+      });
+    }
     req.context = {
       uid: req.params.userID,
     };
