@@ -8,7 +8,7 @@ const article_controller = require("../controllers/articleController");
 router.get("/", user_controller.get_users);
 
 router.get("/isLoggedIn", function (req, res, next) {
-  if (req.isAuthenticated) {
+  if (req.isAuthenticated()) {
     return res.json({
       msg: "Yes the user is logged in",
       user: req.user.username,
