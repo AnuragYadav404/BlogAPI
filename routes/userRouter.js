@@ -64,6 +64,18 @@ router.post(
   user_controller.post_logout_user
 );
 
+router.get("/currentUser", function (req, res, next) {
+  if (req.isAuthenticated()) {
+    return res.json({
+      user: req.user,
+    });
+  } else {
+    return res.json({
+      msg: "You must be logged in first to get the current user.",
+    });
+  }
+});
+
 router.get(
   "/currentUser/articles",
   function (req, res, next) {

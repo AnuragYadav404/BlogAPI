@@ -112,9 +112,25 @@ exports.update_article_byID = asyncHandler(async function (req, res, next) {
 });
 
 exports.delete_article_byID = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This deletes a particular article.",
-  });
+  // we have an articleid -> req.context.aid
+  // we have an user id for user who wants to delete -> req.context.uid
+  // check if user owns this article or not
+  const checkArticle = await article.findById(req.context.aid).exec();
+  if (checkArticle.author.toString() === req.context.uid) {
+    // this user owns this article
+    await article.findByIdAndDelete(req.context.aid);
+    return res.json({
+      msg: "Article delete successfully",
+    });
+  } else {
+    console.log(checkArticle.author);
+    console.log(req.context.uid);
+    console.log(typeof checkArticle.author);
+    console.log(typeof req.context.uid);
+    return res.json({
+      msg: "You do not have permissions to delete this article.",
+    });
+  }
 });
 
 exports.get_articles_by_userID = asyncHandler(async function (req, res, next) {

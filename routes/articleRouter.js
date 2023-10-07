@@ -49,7 +49,28 @@ router.get(
 router.put("/:articleID", article_controller.update_article_byID);
 
 // this deletes a particular article
-router.delete("/:articleID", article_controller.delete_article_byID);
+router.delete(
+  "/:articleID",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      req.context = {
+        uid: req.user.id,
+        aid: req.params.articleID,
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "you must be logged in to delete an article",
+      });
+    }
+  },
+  article_controller.delete_article_byID
+);
 
 // this gets all the comments for a article
 router.get(
