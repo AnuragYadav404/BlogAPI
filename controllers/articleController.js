@@ -103,17 +103,69 @@ exports.get_article_byID = asyncHandler(async function (req, res, next) {
     };
     if (arti && !arti.isPublished) {
       answer.hint = "Article not yet published";
+      answer.article = arti;
     }
     return res.json(answer);
   }
 });
 
 //update and delete will be done
-exports.update_article_byID = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This updates a particular article.",
-  });
-});
+exports.update_article_byID = [
+  body("title", "Title must be provided")
+    .trim()
+    .isLength({ min: 3, max: 190 })
+    .escape(),
+  body("content", "Title must not be empty")
+    .trim()
+    .isLength({ min: 1, max: 9500 })
+    .escape(),
+  asyncHandler(async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        msg: "Field data failed validation checks.",
+        errors: errors.array(),
+        fieldData: req.body,
+      });
+    } else {
+      // so a mod himself can update an article
+      // or the user owner
+      const isMod = req.user.isModerator;
+      const articleDoc = await article.findById(req.context.aid).exec();
+      if (articleDoc) {
+        if (
+          isMod ||
+          articleDoc.author.toString() == req.context.uid.toString()
+        ) {
+          const newArticle = new article({
+            author: articleDoc.author,
+            comments: articleDoc.comments,
+            createdAt: articleDoc.createdAt,
+            title: req.body.title,
+            content: req.body.content,
+            claps: articleDoc.claps,
+            isPublished: articleDoc.isPublished,
+            _id: articleDoc.id,
+          });
+          await article.findByIdAndUpdate(req.context.aid, newArticle, {});
+          return res.json({
+            msg: "Article update successfull",
+            href: newArticle.url,
+            article: newArticle,
+          });
+        } else {
+          return res.json({
+            msg: "Sorry bud you are not allowed to edit this article",
+          });
+        }
+      } else {
+        return res.json({
+          msg: "This article does not exist",
+        });
+      }
+    }
+  }),
+];
 
 exports.delete_article_byID = asyncHandler(async function (req, res, next) {
   // we have an articleid -> req.context.aid

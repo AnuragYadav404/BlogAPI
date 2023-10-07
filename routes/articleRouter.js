@@ -46,7 +46,30 @@ router.get(
 );
 
 // this updates a particular article
-router.put("/:articleID", article_controller.update_article_byID);
+// an article can be updated by owner or the moderator
+// publishing an article will not be allowed via this route
+router.put(
+  "/:articleID",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      req.context = {
+        uid: req.user.id,
+        aid: req.params.articleID,
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "You need to be logged in to edit an article",
+      });
+    }
+  },
+  article_controller.update_article_byID
+);
 
 // this deletes a particular article
 router.delete(

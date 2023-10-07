@@ -141,6 +141,7 @@ exports.update_user_byID = asyncHandler(async function (req, res, next) {
   });
 });
 
+// here the req.context.uid is populated using req.user from middleware
 exports.delete_user_byID = asyncHandler(async function (req, res, next) {
   // this function just deletes the user based on req.params
   // this does not check anything else
