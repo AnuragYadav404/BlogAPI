@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const article = require("../models/article");
-const { body } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 
 exports.get_articles_list = asyncHandler(async function (req, res, next) {
   // this only returns a list of articles
@@ -34,6 +34,19 @@ exports.create_article = [
     .isLength({ min: 1, max: 9500 })
     .escape(),
   asyncHandler(async function (req, res, next) {
+    // first we check validation results
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        msg: "Field data failed validation checks.",
+        errors: errors.array(),
+        fieldData: {
+          title: req.body.title,
+          content: req.body.content,
+        },
+      });
+    }
+
     // create article is a post request to create a new article
     // the article form info will be stored in req.context.body
     // the author info will be associated with req.context.user
@@ -52,6 +65,7 @@ exports.create_article = [
 
     // }
     // we will now create an article
+
     const newArticle = new article({
       author: req.context.user,
       comments: [],
