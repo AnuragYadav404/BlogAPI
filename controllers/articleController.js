@@ -116,3 +116,12 @@ exports.delete_article_byID = asyncHandler(async function (req, res, next) {
     msg: "This deletes a particular article.",
   });
 });
+
+exports.get_articles_by_userID = asyncHandler(async function (req, res, next) {
+  const articlesByUser = await article.find({
+    author: req.context.uid,
+  });
+  return res.json({
+    articles: articlesByUser,
+  });
+});

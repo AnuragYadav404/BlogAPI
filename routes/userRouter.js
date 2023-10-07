@@ -3,8 +3,11 @@ const router = express.Router();
 const user_controller = require("../controllers/userController");
 const passport = require("passport");
 const mongoose = require("mongoose");
+const article_controller = require("../controllers/articleController");
 /* GET users listing. */
 router.get("/", user_controller.get_users);
+
+// this sends back articles related to a particular user
 
 router.post(
   "/signup",
@@ -62,6 +65,23 @@ router.post(
 );
 
 router.get(
+  "/currentUser/articles",
+  function (req, res, next) {
+    if (req.isAuthenticated()) {
+      req.context = {
+        uid: req.user.id,
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "You must be logged in first to get the user's articles.",
+      });
+    }
+  },
+  article_controller.get_articles_by_userID
+);
+
+router.get(
   "/:userID",
   function (req, res, next) {
     if (!mongoose.isValidObjectId(req.params.userID)) {
@@ -77,6 +97,25 @@ router.get(
   },
   user_controller.get_user_byID
 );
+
+// this gets articles related to a particular user
+router.get(
+  "/:userID/articles",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.userID)) {
+      return res.json({
+        msg: "User does not exist",
+      });
+    }
+    req.context = {
+      uid: req.params.userID,
+    };
+    // console.log(req.params.userID);
+    next();
+  },
+  article_controller.get_articles_by_userID
+);
+
 // deleting a user can only be possible if the user wants to delete his own account
 // first the user must be logged in
 // second the user must be deleting his own account only
