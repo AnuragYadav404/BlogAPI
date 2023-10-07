@@ -7,6 +7,19 @@ const article_controller = require("../controllers/articleController");
 /* GET users listing. */
 router.get("/", user_controller.get_users);
 
+router.get("/isLoggedIn", function (req, res, next) {
+  if (req.isAuthenticated) {
+    return res.json({
+      msg: "Yes the user is logged in",
+      user: req.user.username,
+    });
+  } else {
+    return res.json({
+      msg: "No user logged in",
+    });
+  }
+});
+
 // this sends back articles related to a particular user
 
 router.post(
