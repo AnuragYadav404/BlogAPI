@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const comment = require("../models/comment");
 const article = require("../models/article");
-const { body } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 
 exports.get_all_comments_byArticleID = asyncHandler(async function (
   req,
@@ -41,6 +41,18 @@ exports.create_new_comment_byArticleID = [
     // articleID is the document id of the article
     const commentArticle = await article.findById(req.context.aid);
     if (commentArticle) {
+      // check for validation results
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.json({
+          msg: "Entered input data failed validation check",
+          errors: errors.array(),
+          fieldData: {
+            content: req.body.content,
+          },
+        });
+      }
       const newCmnt = new comment({
         cmnt_user: req.context.cmnt_user,
         content: req.body.content,
