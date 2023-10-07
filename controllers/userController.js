@@ -92,6 +92,21 @@ exports.post_login_user = asyncHandler(async function (req, res, next) {
   // this will never exec basically
 });
 
+exports.post_logout_user = asyncHandler(async function (req, res, next) {
+  req.logout(function (err) {
+    if (err) {
+      return res.json({
+        msg: "Failed to logout",
+        err,
+      });
+    } else {
+      return res.json({
+        msg: "Logout successfull!",
+      });
+    }
+  });
+});
+
 exports.get_user_byID = asyncHandler(async function (req, res, next) {
   // here i first have to check if uid is valid object id or not
   // this is already handled in router

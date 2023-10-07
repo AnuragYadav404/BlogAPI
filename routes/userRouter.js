@@ -47,6 +47,20 @@ router.post(
   })
 );
 
+router.post(
+  "/logout",
+  (req, res, next) => {
+    if (req.isAuthenticated()) {
+      next();
+    } else {
+      return res.json({
+        msg: "You must be logged in first to use the log out functionality.",
+      });
+    }
+  },
+  user_controller.post_logout_user
+);
+
 router.get(
   "/:userID",
   function (req, res, next) {
