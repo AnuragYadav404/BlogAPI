@@ -177,6 +177,34 @@ router.delete(
   user_controller.delete_user_byID
 );
 
-router.put("/:userID", user_controller.update_user_byID);
+// only a moderator and user himself can
+// update a user's details
+// will leave out the update stuff
+// this will only update name, username, and description
+// updating isAuthor, isModerator will not be done here
+
+router.put(
+  "/:userID",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.userID)) {
+      return res.json({
+        msg: "User does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      // if the user is auth, continue
+      req.context = {
+        uid: req.params.userID,
+      };
+      next();
+    } else {
+      console.log("user is auth");
+      return res.json({
+        msg: "You must be logged in to update your account!",
+      });
+    }
+  },
+  user_controller.update_user_byID
+);
 
 module.exports = router;

@@ -135,11 +135,64 @@ exports.get_user_byID = asyncHandler(async function (req, res, next) {
 });
 
 // will leave out the update stuff
-exports.update_user_byID = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This updates a particular user information",
-  });
-});
+// this will only update name, username, and description
+// updating isAuthor, isModerator will not be done here
+
+exports.update_user_byID = [
+  body("username", "Username must be min 3 characters and max 30 characters")
+    .trim()
+    .escape()
+    .isLength({ min: 3, max: 30 }),
+  body("description", "description must be at max 1000 characters long")
+    .trim()
+    .escape()
+    .isLength({ max: 1000 }),
+  body("name", "Name must be atleast 2 chars and max 100 characters")
+    .trim()
+    .escape()
+    .isLength({ min: 2, max: 100 }),
+  asyncHandler(async function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        msg: "Field data did not pass validation checks.",
+        errors: errors.array(),
+        fieldData: {
+          username: req.body.username,
+          description: req.body.description,
+        },
+      });
+    }
+    // here the req.context.uid contains the user doc to be updated
+    const userDoc = await user.findById(req.context.uid).exec();
+    if (userDoc) {
+      const isMod = req.user.isModerator;
+      // check if mod is updating or the user himself
+      if (isMod || req.context.uid.toString() == userDoc.id.toString()) {
+        const newUser = new user({
+          username: req.body.username,
+          name: req.body.name,
+          description: req.body.description,
+          hash: userDoc.hash,
+          salt: userDoc.salt,
+          isAuthor: userDoc.isAuthor,
+          isModerator: userDoc.isModerator,
+          doj: userDoc.doj,
+          _id: userDoc.id,
+        });
+        await user.findByIdAndUpdate(req.context.uid, newUser, {});
+        return res.json({
+          msg: "User update successfull.",
+          href: newUser.url,
+        });
+      }
+    } else {
+      return res.json({
+        msg: "No such user exists to update",
+      });
+    }
+  }),
+];
 
 // here the req.context.uid is populated using req.user from middleware
 exports.delete_user_byID = asyncHandler(async function (req, res, next) {
