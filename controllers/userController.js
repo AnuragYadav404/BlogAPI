@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const user = require("../models/user");
 const genPassword = require("../lib/passwordUtils").genPassword;
 const mongoose = require("mongoose");
-const { body } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 // controller to get the list of all the users
 exports.get_users = asyncHandler(async function (req, res, next) {
   // this presents a list of users
@@ -39,6 +39,20 @@ exports.post_signup_user = [
     .escape()
     .isLength({ max: 1000 }),
   asyncHandler(async function (req, res, next) {
+    // check for validation results
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.json({
+        msg: "Field data did not pass validation checks.",
+        errors: errors.array(),
+        fieldData: {
+          username: req.body.username,
+          password: req.body.password,
+          description: req.body.description,
+        },
+      });
+    }
+
     // this handler will handle user creation
     // this will also check if the username is in use
     const checkUsername = await user
