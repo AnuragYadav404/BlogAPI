@@ -142,7 +142,11 @@ exports.update_user_byID = asyncHandler(async function (req, res, next) {
 });
 
 exports.delete_user_byID = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This deletes a particular user information",
+  // this function just deletes the user based on req.params
+  // this does not check anything else
+  // maybe it first need to check if the user even exists or not?
+  await user.findByIdAndDelete(req.context.uid);
+  return res.json({
+    msg: "User deleted successfully",
   });
 });

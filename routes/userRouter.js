@@ -77,9 +77,42 @@ router.get(
   },
   user_controller.get_user_byID
 );
+// deleting a user can only be possible if the user wants to delete his own account
+// first the user must be logged in
+// second the user must be deleting his own account only
+
+// delete must only be called on the current user and not using param
+router.delete(
+  "/delete",
+  function (req, res, next) {
+    if (req.isAuthenticated()) {
+      console.log("user is auth");
+      req.context = {
+        uid: req.user.id,
+      };
+      // here first the user must be logged out,
+      // then his acc is deleted from user Collection
+      req.logout(function (err) {
+        if (err) {
+          console.log("Error logging out");
+          return res.json({
+            msg: "User not logged out before deleting",
+            err,
+          });
+        }
+      });
+      console.log("User logged out successfully");
+      next();
+    } else {
+      console.log("user is auth");
+      return res.json({
+        msg: "You must be logged in to delete your account!",
+      });
+    }
+  },
+  user_controller.delete_user_byID
+);
 
 router.put("/:userID", user_controller.update_user_byID);
-
-router.delete("/:userID", user_controller.delete_user_byID);
 
 module.exports = router;
