@@ -98,9 +98,13 @@ exports.get_article_byID = asyncHandler(async function (req, res, next) {
       arti,
     });
   } else {
-    return res.json({
+    const answer = {
       msg: "No article found with this article id",
-    });
+    };
+    if (arti && !arti.isPublished) {
+      answer.hint = "Article not yet published";
+    }
+    return res.json(answer);
   }
 });
 

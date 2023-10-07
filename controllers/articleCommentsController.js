@@ -118,8 +118,53 @@ exports.update_comment = asyncHandler(async function (req, res, next) {
   });
 });
 
+// a comment can be deleted by user himself and author of post
+// maybe a functionality can be added to delete a message
+// by a moderator
+// only a mod and user himself can delete commments
 exports.delete_comment = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This deletes a particular comment for a particular article.",
-  });
+  // we have commentID, articleID, currentUserID
+  // a comment deletion must be reflected in :
+  // 1. comment collection
+  // 2. article's comment array
+  // first check for permission
+  // deletion if mod is deleting
+  const isMod = req.user.isModerator;
+  const articleDoc = await article.findById(req.context.aid).exec();
+  const commentDoc = await comment.findById(req.context.cid).exec();
+  if (articleDoc && commentDoc) {
+    if (
+      isMod ||
+      commentDoc.cmnt_user.toString() == req.context.uid.toString()
+    ) {
+      const newCommentArray = articleDoc.comments.filter(
+        (item) => item.toString() != req.context.cid.toString()
+      );
+      const newArticleItem = new article({
+        author: articleDoc.author,
+        comments: newCommentArray,
+        createdAt: articleDoc.createdAt,
+        title: articleDoc.title,
+        claps: articleDoc.claps,
+        content: articleDoc.content,
+        isPublished: articleDoc.isPublished,
+        _id: articleDoc._id,
+      });
+      await article
+        .findByIdAndUpdate(req.context.aid, newArticleItem, {})
+        .exec();
+      // now also delete the comment
+      await article.findByIdAndDelete(req.context.cid);
+      return res.json({
+        msg: "Comment successfully deleted",
+        articleUrl: newArticleItem.url,
+      });
+    }
+  } else {
+    return res.json({
+      msg: "Article or comment does not exist",
+      articleDoc,
+      commentDoc,
+    });
+  }
 });
