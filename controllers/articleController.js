@@ -197,3 +197,105 @@ exports.get_articles_by_userID = asyncHandler(async function (req, res, next) {
     articles: articlesByUser,
   });
 });
+
+// it will only publish articles
+exports.publish_article_byID = asyncHandler(async function (req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.json({
+      msg: "Invalid publish request",
+      errors: errors.array(),
+    });
+  } else {
+    // check if article exists or not
+    const articleDoc = await article.findById(req.context.aid);
+    if (articleDoc) {
+      // check if user has permissions to publish
+      if (
+        req.user.isModerator ||
+        req.context.uid.toString() == articleDoc.author.toString()
+      ) {
+        if (articleDoc.isPublished) {
+          // here we will update the article
+          return res.json({
+            msg: "article already published!",
+          });
+        }
+        const newArticle = new article({
+          author: articleDoc.author,
+          comments: articleDoc.comments,
+          createdAt: articleDoc.createdAt,
+          title: articleDoc.title,
+          claps: articleDoc.claps,
+          content: articleDoc.content,
+          isPublished: true,
+          _id: articleDoc.id,
+        });
+        await article.findByIdAndUpdate(req.context.aid, newArticle, {});
+        return res.json({
+          msg: "article publish successfull",
+          href: newArticle.url,
+        });
+      } else {
+        return res.json({
+          msg: "Sorry buddy, you don't have permissions to do so",
+        });
+      }
+    } else {
+      return res.json({
+        msg: "No such article exists",
+      });
+    }
+  }
+});
+
+// it will only unpublish articles
+exports.unpublish_article_byID = asyncHandler(async function (req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.json({
+      msg: "Invalid unpublish request",
+      errors: errors.array(),
+    });
+  } else {
+    // check if article exists or not
+    const articleDoc = await article.findById(req.context.aid);
+    if (articleDoc) {
+      // check if user has permissions to publish
+      if (
+        req.user.isModerator ||
+        req.context.uid.toString() == articleDoc.author.toString()
+      ) {
+        if (!articleDoc.isPublished) {
+          // here we will update the article
+          return res.json({
+            msg: "article already un-published!",
+          });
+        }
+        const newArticle = new article({
+          author: articleDoc.author,
+          comments: articleDoc.comments,
+          createdAt: articleDoc.createdAt,
+          title: articleDoc.title,
+          claps: articleDoc.claps,
+          content: articleDoc.content,
+          isPublished: false,
+          _id: articleDoc.id,
+        });
+        await article.findByIdAndUpdate(req.context.aid, newArticle, {});
+        return res.json({
+          msg: "article unpublish successfull",
+          href: newArticle.url,
+        });
+      } else {
+        return res.json({
+          msg: "Sorry buddy, you don't have permissions to do so",
+        });
+      }
+    } else {
+      return res.json({
+        msg: "No such article exists",
+      });
+    }
+  }
+});

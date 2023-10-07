@@ -95,6 +95,54 @@ router.delete(
   article_controller.delete_article_byID
 );
 
+//this route handles the publishing of a particular article
+router.post(
+  "/:articleID/publish",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      req.context = {
+        uid: req.user.id, // user who is making a request
+        aid: req.params.articleID, // article who needs to be published
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "you must be logged in to publish an article",
+      });
+    }
+  },
+  article_controller.publish_article_byID
+);
+
+//this route handles the unpublishing of a particular article
+router.post(
+  "/:articleID/unpublish",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      req.context = {
+        uid: req.user.id, // user who is making a request
+        aid: req.params.articleID, // article who needs to be published
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "you must be logged in to publish an article",
+      });
+    }
+  },
+  article_controller.unpublish_article_byID
+);
+
 // this gets all the comments for a article
 router.get(
   "/:articleID/comments",
