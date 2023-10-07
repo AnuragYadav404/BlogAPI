@@ -14,7 +14,11 @@ const userSchema = new Schema({
   // personal details for user
   name: { type: String, required: true, minLength: 2, maxLength: 100 },
   doj: { type: Date, default: Date.now() },
-  description: { type: String, maxLength: 1000 },
+  description: {
+    type: String,
+    maxLength: 1000,
+    default: "This is an awesome user!",
+  },
 });
 
 userSchema.virtual("url").get(function () {

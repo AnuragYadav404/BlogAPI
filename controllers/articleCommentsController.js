@@ -112,11 +112,53 @@ exports.get_comment = asyncHandler(async function (req, res, next) {
 });
 
 //update and delete will be implemented later
-exports.update_comment = asyncHandler(async function (req, res, next) {
-  res.json({
-    msg: "This updates a particular comment for a particular article",
-  });
-});
+// update should also include validation checks as in create
+exports.update_comment = [
+  body("content", "Comment length must be min 1 and max 2000 characters")
+    .trim()
+    .escape()
+    .isLength({
+      min: 1,
+      max: 2000,
+    }),
+  asyncHandler(async function (req, res, next) {
+    const errors = validationResult(req);
+    const isMod = req.user.isModerator;
+    if (!errors.isEmpty()) {
+      return res.json({
+        msg: "Comment's field data failed validation checks",
+        fieldData: req.body,
+      });
+    } else {
+      const commentDoc = await comment.findById(req.context.cid);
+      if (commentDoc) {
+        if (
+          isMod ||
+          commentDoc.cmnt_user.toString() == req.user._id.toString()
+        ) {
+          const newComment = new comment({
+            cmnt_user: commentDoc.cmnt_user,
+            content: req.body.content,
+            createdAt: commentDoc.createdAt,
+            _id: commentDoc._id,
+          });
+          await comment.findByIdAndUpdate(req.context.cid, newComment, {});
+          return res.json({
+            msg: "Comment updated successfull",
+          });
+        } else {
+          res.json({
+            msg: "Sorry buddy you are not allowed to do such stuff.",
+          });
+        }
+      } else {
+        res.json({
+          msg: "The comment you are trying to update does not exist",
+        });
+      }
+    }
+  }),
+];
 
 // a comment can be deleted by user himself and author of post
 // maybe a functionality can be added to delete a message

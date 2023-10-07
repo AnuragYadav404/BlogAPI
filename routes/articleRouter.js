@@ -140,8 +140,34 @@ router.get(
 // this updates a particular comment for a particular article
 // this can be implemented by only comment collscan
 // should we also check if articleID and commentID is valid combo?
+// just updates the comment's content
+// only a user or a moderator can update an comment
 router.put(
   "/:articleID/comments/:commentID",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.articleID)) {
+      return res.json({
+        msg: "Article does not exist",
+      });
+    }
+    if (!mongoose.isValidObjectId(req.params.commentID)) {
+      return res.json({
+        msg: "Comment does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      req.context = {
+        aid: req.params.articleID,
+        cid: req.params.commentID,
+        uid: req.user.id,
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "you must be logged in to update comments",
+      });
+    }
+  },
   article_comment_controller.update_comment
 );
 
