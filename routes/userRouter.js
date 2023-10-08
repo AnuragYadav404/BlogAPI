@@ -122,6 +122,28 @@ router.get(
   },
   user_controller.get_user_byID
 );
+router.post(
+  "/:userID/assignAuthor",
+  function (req, res, next) {
+    if (!mongoose.isValidObjectId(req.params.userID)) {
+      return res.json({
+        msg: "User does not exist",
+      });
+    }
+    if (req.isAuthenticated()) {
+      req.context = {
+        uid: req.user.id,
+        uaid: req.params.userID,
+      };
+      next();
+    } else {
+      return res.json({
+        msg: "You must be logged in first to assign the user as an author.",
+      });
+    }
+  },
+  user_controller.set_user_as_author_byID
+);
 
 // this gets articles related to a particular user
 router.get(

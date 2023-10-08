@@ -3,6 +3,7 @@ const user = require("../models/user");
 const genPassword = require("../lib/passwordUtils").genPassword;
 const mongoose = require("mongoose");
 const { body, validationResult } = require("express-validator");
+require("dotenv").config();
 // controller to get the list of all the users
 exports.get_users = asyncHandler(async function (req, res, next) {
   // this presents a list of users
@@ -204,3 +205,56 @@ exports.delete_user_byID = asyncHandler(async function (req, res, next) {
     msg: "User deleted successfully",
   });
 });
+
+// req.context contains the uid
+// uid is the curretly logged user
+// uaid is the user id who is to be permitted as an author
+exports.set_user_as_author_byID = [
+  body("authorPassword").trim().escape(),
+  asyncHandler(async function (req, res, next) {
+    if (req.body.authorPassword != process.env.AUTHORPASS) {
+      return res.json({
+        msg: "Incorrect password for author authorization.",
+      });
+    }
+    const userDoc = await user.findById(req.context.uaid).exec();
+    if (userDoc) {
+      if (
+        req.user.isModerator ||
+        req.user.id.toString() == userDoc.id.toString()
+      ) {
+        if (!userDoc.isAuthor) {
+          const newUser = new user({
+            username: userDoc.username,
+            hash: userDoc.hash,
+            salt: userDoc.salt,
+            isAuthor: true,
+            isModerator: userDoc.isModerator,
+            name: userDoc.name,
+            doj: userDoc.doj,
+            description: userDoc.description,
+            _id: userDoc.id,
+          });
+
+          await user.findByIdAndUpdate(req.context.uid, newUser, {});
+          return res.json({
+            msg: "User assigned as an author",
+            href: newUser.url,
+          });
+        }
+        return res.json({
+          msg: "User already assigned as an author",
+          href: userDoc.url,
+        });
+      } else {
+        return res.json({
+          msg: "Sorry blud, you are not allowed to do this.",
+        });
+      }
+    } else {
+      return res.json({
+        msg: "The user does not exist.",
+      });
+    }
+  }),
+];
